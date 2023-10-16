@@ -1,5 +1,7 @@
 # Vefforritun 1, 2023: Verkefni 7, JS #1
 
+[Kynning og byrjun á verkefni úr fyrirlestri 9](https://youtu.be/95g4uylHkyQ).
+
 ## Markmið
 
 - Búa til JavaScript forrit sem notar föll, flæðistýringar og ítranir.
