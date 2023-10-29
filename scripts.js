@@ -160,7 +160,7 @@ function validateInteger(num, min = 0, max = Infinity) {
  * ```
  * @param {Product} product Vara til að birta
  * @param {number | undefined} quantity Fjöldi af vöru, `undefined` ef ekki notað.
- * @returns Streng sem inniheldur upplýsingar um vöru og hugsanlega fjölda af henni.
+ * @returns {string}Streng sem inniheldur upplýsingar um vöru og hugsanlega fjölda af henni.
  */
 function formatProduct(product, quantity = undefined) {
 
@@ -186,18 +186,18 @@ function formatProduct(product, quantity = undefined) {
  * Samtals: 11.000 kr.
  * ```
  * @param {Cart} cart Karfa til að fá upplýsingar um.
- * @returns Streng sem inniheldur upplýsingar um körfu.
+ * @returns {string} Streng sem inniheldur upplýsingar um körfu.
  */
 function cartInfo(cart) {
   /* Útfæra */
   let cartInfoString = '';
-
+  let total=0;
   for (const line of cart.lines) {
     const { product, quantity } = line;
     const lineTotal = product.price * quantity;
-    cartInfoString += `${product.title} — ${formatPrice(product.price)} kr. á stk. x ${quantity} = ${formatPrice(lineTotal)} kr.\n`;
+    cartInfoString += `${product.title} — ${quantity}x${formatPrice(product.price)} samtals ${formatPrice(lineTotal)}\n`;
+    
   }
-
   return cartInfoString;
 
 }
@@ -354,20 +354,26 @@ function addProductToCart() {
     return;
   }
 
-  
-
-
 
   
+  // Birtum upplýsingar um vöru sem við bjuggum til.
+ 
   
   let productInCart = cart.lines.find((i) => i.product.id === productId);
   
   if(productInCart) { // ef product in cart er til: 
-    productInCart.quantity += 1;
+    productInCart.quantity += numProd;
+    const totalQuantity = productInCart.quantity;
+    const totalPrice = totalQuantity * product.price;
+    console.info(`Vöru fjöldi uppfærður: \n${formatProduct(product, totalQuantity)}`);
+
   } else {
-    const newLine = {product: product, quantity: 1}
+    const newLine = {product: product, quantity: numProd};
     cart.lines.push(newLine);
+    console.info(`Vöru bætt við í körfu:\n${formatProduct(product, numProd)}`);
   }
+
+  
   /* Hér ætti að nota `validateInteger` hjálparfall til að staðfesta gögn frá notanda */
   
   /* Til að athuga hvort vara sé til í `cart` þarf að nota `cart.lines.find` */
@@ -398,9 +404,10 @@ function showCart() {
   for (const line of cart.lines) {
     const { product, quantity } = line;
     const lineTotal = product.price * quantity;
-    console.log(`${product.title} — ${formatPrice(product.price)} kr. á stk. x ${quantity} = ${formatPrice(lineTotal)} kr.`);
+    console.log(`${product.title} — ${quantity}x${formatPrice(product.price)} samtals ${formatPrice(lineTotal)} `);
     total += lineTotal;
   }
+  console.log(`Samtals: ${formatPrice(total)}`);
 }
 
 /**
@@ -429,14 +436,21 @@ function checkout() {
   }
 
   const name = prompt(`Nafn:`);
+
+  if(!name){
+    console.error(`Nafn má ekki vera tómt.`);
+    return;
+  }
+
   const address = prompt(`Heimilisfang:`);
 
-  if (!name || !address) {
-    console.error(`Nafn og heimilisfang verða að vera fyllt inn.`);
+  if(!address) {
+    console.error(`Hemilisfang má ekki vera tómt.`);
     return;
   }
 
   console.log(`Pöntun móttekin ${name}.`);
   console.log(`Vörur verða sendar á ${address}.\n`);
-  console.log(cartInfo(cart));
+  console.log(showCart());
+  
 }
