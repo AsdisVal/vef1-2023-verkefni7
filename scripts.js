@@ -335,7 +335,7 @@ function addProductToCart() {
   }
 
   if(!product) {
-  console.error(`vara fannst ekki`);
+  console.error(`Auðkenni vöru er ekki löglegt, verður að vera heiltala stærri en 0.`);
   return;
   }
 
