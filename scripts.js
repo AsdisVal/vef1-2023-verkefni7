@@ -290,8 +290,35 @@ function showProducts() {
  * @returns undefined
  */
 function addProductToCart() {
-  /* Útfæra */
+  debugger;
+  const productIdAsString = prompt(`Auðkenni vöru sem á að bæta við körfu: `)
+  
+  // TODO: validatea að þetta sé í raun tala sem er vara og ekki null.
+  if (!productIdAsString) {
+    console.error(`verður að vera tala`)
+    return;  // ef gildið er falsy skilum við null, annars er það true->strengur
+  }
 
+  const productId = Number.parseInt(productIdAsString); // ParseInt tekur inn streng, en gildið hér er strengur eða null.  
+  console.log(productId);
+  const product = products.find((i) => i.id === productId)
+
+  if(!product) {
+  console.error(`vara fannst ekki`);
+  return;
+  }
+
+
+  
+  
+  let productInCart = cart.lines.find((i) => i.product.id === productId);
+  
+  if(productInCart) { // ef product in cart er til: 
+    productInCart.quantity += 1;
+  } else {
+    const newLine = {product: product, quantity: 1}
+    cart.lines.push(newLine);
+  }
   /* Hér ætti að nota `validateInteger` hjálparfall til að staðfesta gögn frá notanda */
   
   /* Til að athuga hvort vara sé til í `cart` þarf að nota `cart.lines.find` */
