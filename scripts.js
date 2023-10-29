@@ -14,7 +14,10 @@
 // - Körfu sem geymir vörur sem notandi vill kaupa
 // Í báðum tilfellum notum við gagnaskipan (e. data structure) með því að nota hluti (objects),
 // fylki (array) og grunn gildi (e. primitive values) eins og tölur (numbers) og strengi (string).
-
+const MIN_NUM_ID = 1;
+const MAX_NUM_ID = 99;
+const MIN_NUM_OF_PRODUCTS = 1;
+const MAX_NUM_OF_PRODUCTS = 99;
 // Hér notum við _typedef_ til að skilgreina hvernig Product hluturinn okkar lítur út.
 // Þetta er ekki JavaScript heldur sérstök skilgreining frá JSDoc sem VSCode notar til að hjálpa
 // okkur við að skrifa með því að birta intellisense/autocomplete og hugsanlega sýna villur.
@@ -125,7 +128,15 @@ const cart = {
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
  */
 function formatPrice(price) {
-  return price.toString();
+//   const formatter = new Intl.NumberFormat(`is-IS`, {
+//     style: `currency`,
+//     currency: `ISK` 
+//    });
+
+//  return formatter.format(price);
+  // return price.toString();
+  return new Intl.NumberFormat('de-DE').format(price).replace(',', '.') + ' kr.';
+
 }
 
 /**
@@ -137,7 +148,7 @@ function formatPrice(price) {
  */
 function validateInteger(num, min = 0, max = Infinity) {
   /* Útfært */
-  return min <= num && num <= max;
+  return Number.isInteger(num) && min <= num && num <= max;
 }
 
 /**
@@ -161,7 +172,7 @@ function formatProduct(product, quantity = undefined) {
     return `${product.title} - ${quantity}x${formatPrice(product.price)} samtals ${total}`;
   }
   else { 
-    return `${product.title} - ${product.price}`;  
+    return `${product.title} - ${formatPrice(product.price)}`;  
   }
   
 }
@@ -179,6 +190,16 @@ function formatProduct(product, quantity = undefined) {
  */
 function cartInfo(cart) {
   /* Útfæra */
+  let cartInfoString = '';
+
+  for (const line of cart.lines) {
+    const { product, quantity } = line;
+    const lineTotal = product.price * quantity;
+    cartInfoString += `${product.title} — ${formatPrice(product.price)} kr. á stk. x ${quantity} = ${formatPrice(lineTotal)} kr.\n`;
+  }
+
+  return cartInfoString;
+
 }
 
 // --------------------------------------------------------
@@ -270,6 +291,10 @@ function addProduct() {
  * @returns undefined
  */
 function showProducts() {
+  for (let i = 0; i < products.length; i++) {
+    const product = products[i];
+    console.info(`\n#${ i + 1} ${product.title} - ${product.description} - ${formatPrice(product.price)}`);
+  }
   /* Útfæra */
   /* Hér ætti að nota `formatPrice` hjálparfall */
 }
@@ -290,8 +315,9 @@ function showProducts() {
  * @returns undefined
  */
 function addProductToCart() {
-  debugger;
-  const productIdAsString = prompt(`Auðkenni vöru sem á að bæta við körfu: `)
+  // debugger;
+  const productIdAsString = prompt(`Sláðu inn auðkenni (ID) á vöru sem þú vilt bæta í körfu: `)
+  
   
   // TODO: validatea að þetta sé í raun tala sem er vara og ekki null.
   if (!productIdAsString) {
@@ -303,10 +329,33 @@ function addProductToCart() {
   console.log(productId);
   const product = products.find((i) => i.id === productId)
 
+  if(MIN_NUM_ID > productId || productId > MAX_NUM_ID) {
+    console.error(`Fjöldi er ekki löglegur, lágmark ${MIN_NUM_ID} og hámark ${MAX_NUM_ID}.`);
+    return;
+  }
+
   if(!product) {
   console.error(`vara fannst ekki`);
   return;
   }
+
+  const numberOfProductsAsString = prompt(`Sláðu inn fjölda sem þú vilt bæta í körfu: `)
+ 
+  // TODO: validatea að þetta sé í raun tala sem er vara og ekki null.
+  if (!numberOfProductsAsString) {
+    console.error(`verður að vera tala`)
+    return;  // ef gildið er falsy skilum við null, annars er það true->strengur
+  }
+  const numProd = Number.parseInt(numberOfProductsAsString); // ParseInt tekur inn streng, en gildið hér er strengur eða null.  
+  console.log(productId);
+
+  if(MIN_NUM_OF_PRODUCTS > numProd || numProd > MAX_NUM_OF_PRODUCTS) {
+    console.error(`Fjöldi er ekki löglegur, lágmark ${MIN_NUM_OF_PRODUCTS} og hámark ${MAX_NUM_OF_PRODUCTS}.`);
+    return;
+  }
+
+  
+
 
 
   
@@ -338,6 +387,20 @@ function addProductToCart() {
  */
 function showCart() {
   /* Útfæra */
+  /* Útfæra */
+  if (cart.lines.length === 0) {
+    console.log('Karfan er tóm.');
+    return;
+  }
+
+  let total = 0;
+
+  for (const line of cart.lines) {
+    const { product, quantity } = line;
+    const lineTotal = product.price * quantity;
+    console.log(`${product.title} — ${formatPrice(product.price)} kr. á stk. x ${quantity} = ${formatPrice(lineTotal)} kr.`);
+    total += lineTotal;
+  }
 }
 
 /**
@@ -360,4 +423,20 @@ function showCart() {
  */
 function checkout() {
   /* Útfæra */
+  if (cart.lines.length === 0) {
+    console.log(`Karfan er tóm.`);
+    return;
+  }
+
+  const name = prompt(`Nafn:`);
+  const address = prompt(`Heimilisfang:`);
+
+  if (!name || !address) {
+    console.error(`Nafn og heimilisfang verða að vera fyllt inn.`);
+    return;
+  }
+
+  console.log(`Pöntun móttekin ${name}.`);
+  console.log(`Vörur verða sendar á ${address}.\n`);
+  console.log(cartInfo(cart));
 }
